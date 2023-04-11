@@ -6,13 +6,22 @@
 
     <v-container style="z-index: 0; width: 100%;  border-width:1px; background-color: white;">
         <h2>Registro Patronal</h2>
+        <!--ESTAS SON -->
+        <v-tabs color="blue" style="width: 100%;" bg-color="white" v-model="tab" show-arrows>
+
+            <v-tab value="tab-1" >
+                <v-icon style="margin-right: 5px;">mdi-account-plus </v-icon>Reistro Patronal Activos</v-tab>
+            <!-- <v-tab value="tab-2" @click="actualizarTablaBaja()"> -->
+            <v-tab value="tab-2" >
+                <v-icon style="margin-right: 5px; ">mdi-account-minus </v-icon>Reistro Patronal Baja</v-tab>
+        </v-tabs>
         <div
             style="z-index: 0; width: 100%;  border-width:1px; background-color: white;text-align: end;margin-bottom: 16px; ">
             <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-account-multiple-plus-outline" color="blue"
                 bg-color="white" @click="nuevoRegistroPatronal()">Agregar</v-btn>
         </div>
 
-        <tablaRegistroPatronal></tablaRegistroPatronal>
+        <tablaRegistroPatronal ref="tablaRegistroPatronal"></tablaRegistroPatronal>
     </v-container>
 
     <!--Modal agregar nuevo registro patronal-->
@@ -34,7 +43,7 @@
             </v-toolbar>
 
             <v-container style="margin-top: 80px;">
-                <v-form ref="formEditarEmpleados" v-model="valid" lazy-validation>
+                <v-form ref="formAltaRegistroPatronal" v-model="valid" lazy-validation>
                     <v-row class="filasRegistro">
                         <!--numero de registro patronal-->
                         <v-col cols="12" md="6">
@@ -44,8 +53,8 @@
 
                         <!-- Fecha alta -->
                         <v-col cols="12" md="6">
-                            <v-text-field v-model="dfechaAlta" type="date" label="Fecha Alta" variant="outlined" required
-                                density="compact"></v-text-field>
+                            <v-text-field v-model="dfechaAlta" type="date" min="dFechaAlta" label="Fecha Alta"
+                                variant="outlined" required density="compact"></v-text-field>
                         </v-col>
 
                         <!-- Zona o ciudad -->
@@ -62,8 +71,8 @@
 
                         <!-- Prima de riesgo -->
                         <v-col cols="12" md="6">
-                            <v-text-field v-model="nPrimaRiesgo" label="Prima de Riesgo" variant="outlined" required
-                                density="compact"></v-text-field>
+                            <v-text-field v-model="nPrimaRiesgo" type="number" step=0.01 min="0" label="Prima de Riesgo"
+                                variant="outlined" required density="compact"></v-text-field>
                         </v-col>
 
                         <!-- Numero de lementos -->
@@ -78,7 +87,7 @@
                             <v-btn color="red" @click="(this.dialogAgregarRegistroPatronal = false)">Cancelar</v-btn>
                         </v-col>
                         <v-col cols="12" md="6" style="text-align:right">
-                            <v-btn color="primary" @click="registrarEmpleados">Registrar</v-btn>
+                            <v-btn color="primary" @click="agregarRegistroPatronal">Registrar</v-btn>
 
                         </v-col>
                     </v-row>
@@ -92,15 +101,16 @@
 <script>
 import navBar from '../general/navBar.vue';
 import tablaRegistroPatronal from '../../components/tablaRegistroPatronal.vue';
+import axios from 'axios';
 
 export default {
     components: {
         navBar,
-        tablaRegistroPatronal,
+        tablaRegistroPatronal: tablaRegistroPatronal,
         EasyDataTable: window['vue3-easy-data-table'],
     },
     created() {
-
+        let dFechaActual = new Date().toLocaleDateString();
     },
     data() {
         return {
@@ -118,29 +128,47 @@ export default {
             nPrimaRiesgo: null,
             nElementos: 0,
 
+
         }
     },
     methods: {
         nuevoRegistroPatronal() {
             let self = this;
             self.dialogAgregarRegistroPatronal = true;
-            self.dfechaAlta = self.printDate();
         },
-        printDate: function () {
-            return new Date().toLocaleDateString();
-        },
-        agregarRegistroPatronal: function(){
+        agregarRegistroPatronal: function () {
             let self = this;
-
-            axios.post(self.entorno + 'contabilidad/getRegistroPatronal')
-                .then(function (response) {
-                    self.itemsRegistrosPatronal = response.data;
-                    self.nEstadoRegistroPatronal = response.data[0].nEstado;
-                })
+            console.log(self.dfechaAlta);
+            axios.post(self.entorno + 'contabilidad/altaRegistroPatronal', {
+                nRegistroPatronal: self.nRegistroPatronal,
+                dFechaAlta: self.dfechaAlta,
+                sZonaCiudad: self.sZonaCiudad,
+                nSalarioMinimoZPR: self.nSalarioMinimoZPR,
+                nPrimaRiesgo: self.nPrimaRiesgo,
+                nElementos: self.nElementos
+            }).then(function (response) {
+                var res = response.data.affectedRows;
+                if (res == '1') {
+                    self.$notify({
+                        title: "OK",
+                        text: "El registro patronal fue registrado con exito.",
+                        type: 'success'
+                    });
+                    self.$refs.formAltaRegistroPatronal.reset()
+                    self.dialogAgregarRegistroPatronal = false;
+                    self.$refs.tablaRegistroPatronal.getRegistrosPatronal();
+                } else {
+                    self.$notify({
+                        title: "Error de registro",
+                        text: "Ocurrio un error al registrar el Registro patronal.",
+                        type: 'warn'
+                    });
+                }
+            })
         }
     },
     mounted: function () {
-        
+
     }
 }
 </script>

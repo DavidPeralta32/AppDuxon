@@ -46,8 +46,6 @@
         </template>
 
     </EasyDataTable>
-
-
 </template>
 
 <script>
@@ -89,17 +87,19 @@ export default ({
         }
     },
     methods: {
-        async getRegistrosPatronal() {
+        getRegistrosPatronal() {
             let self = this;
 
-            await axios.post(self.entorno + 'contabilidad/getRegistroPatronal')
+            axios.post(self.entorno + 'contabilidad/getRegistroPatronal')
                 .then(function (response) {
                     self.itemsRegistrosPatronal = response.data;
                     self.nEstadoRegistroPatronal = response.data[0].nEstado;
                 })
-
         },
-        
+        bajaRegistroPatronal: function(nRegistroPatronal){
+            
+        }
+
     },
 });
 
