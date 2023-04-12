@@ -9,20 +9,38 @@
         <!--ESTAS SON -->
         <v-tabs color="blue" style="width: 100%;" bg-color="white" v-model="tab" show-arrows>
 
-            <v-tab value="tab-1" >
-                <v-icon style="margin-right: 5px;">mdi-account-plus </v-icon>Reistro Patronal Activos</v-tab>
+            <v-tab value="tab-Activos" @click="obtenerPatronalActivos()">
+                <v-icon style="margin-right: 5px;">mdi-account-plus </v-icon>Registro Patronal Activos</v-tab>
             <!-- <v-tab value="tab-2" @click="actualizarTablaBaja()"> -->
-            <v-tab value="tab-2" >
-                <v-icon style="margin-right: 5px; ">mdi-account-minus </v-icon>Reistro Patronal Baja</v-tab>
+            <v-tab value="tab-Bajas" @click="obtenerPatronalBajas()">
+                <v-icon style="margin-right: 5px; ">mdi-account-minus </v-icon>Registro Patronal Baja</v-tab>
         </v-tabs>
-        <div
-            style="z-index: 0; width: 100%;  border-width:1px; background-color: white;text-align: end;margin-bottom: 16px; ">
-            <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-account-multiple-plus-outline" color="blue"
-                bg-color="white" @click="nuevoRegistroPatronal()">Agregar</v-btn>
-        </div>
-
-        <tablaRegistroPatronal ref="tablaRegistroPatronal"></tablaRegistroPatronal>
     </v-container>
+
+    <v-window v-model="tab" style="min-height:  100%; padding: 0% 5%;">
+        <!--item Activos-->
+        <v-window-item value="tab-Activos" style="min-height:  100%; margin-top: 2%; margin-bottom: 5%; border: 0;">
+            <v-container style="z-index: 0; width: 100%;  border-width:1px; background-color: white;">
+                <div
+                    style="z-index: 0; width: 100%;  border-width:1px; background-color: white;text-align: end;margin-bottom: 16px; ">
+                    <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-account-multiple-plus-outline"
+                        color="blue" bg-color="white" @click="nuevoRegistroPatronal()">Agregar</v-btn>
+                </div>
+
+                <tablaRegistroPatronal ref="tablaRegistroPatronal"></tablaRegistroPatronal>
+            </v-container>
+        </v-window-item>
+
+        <!--item bajas-->
+        <v-window-item value="tab-Bajas" style="min-height:  100%; margin-top: 2%; margin-bottom: 5%; border: 0;">
+            <v-container style="z-index: 0; width: 100%;  border-width:1px; background-color: white;">
+                <tablaRegistroPatronalBaja ref="tablaRegistroPatronalBaja"></tablaRegistroPatronalBaja>
+            </v-container>
+        </v-window-item>
+
+    </v-window>
+
+
 
     <!--Modal agregar nuevo registro patronal-->
     <v-dialog style="width: 60%; min-height: auto;" v-model="dialogAgregarRegistroPatronal" persistent="true"
@@ -101,16 +119,17 @@
 <script>
 import navBar from '../general/navBar.vue';
 import tablaRegistroPatronal from '../../components/tablaRegistroPatronal.vue';
+import tablaRegistroPatronalBaja from '../../components/tablaRegistroPatronalBaja.vue';
 import axios from 'axios';
 
 export default {
     components: {
         navBar,
         tablaRegistroPatronal: tablaRegistroPatronal,
+        tablaRegistroPatronalBaja: tablaRegistroPatronalBaja,
         EasyDataTable: window['vue3-easy-data-table'],
     },
     created() {
-        let dFechaActual = new Date().toLocaleDateString();
     },
     data() {
         return {
@@ -127,9 +146,20 @@ export default {
             nSalarioMinimoZPR: 0.0,
             nPrimaRiesgo: null,
             nElementos: 0,
-
+            tab: "tab-Activos",
+            
 
         }
+    },
+    watch: {
+        obtenerPatronalBajas(){
+            const self = this;
+            self.$refs.tablaRegistroPatronalBaja.getRegistrosPatronalBaja();
+        },
+        obtenerPatronalActivos(){
+            const self = this;
+            self.$refs.tablaRegistroPatronal.getRegistrosPatronal();
+        },
     },
     methods: {
         nuevoRegistroPatronal() {
@@ -157,7 +187,13 @@ export default {
                     self.$refs.formAltaRegistroPatronal.reset()
                     self.dialogAgregarRegistroPatronal = false;
                     self.$refs.tablaRegistroPatronal.getRegistrosPatronal();
-                } else {
+                }else if(response.data.sqlState == "23000"){
+                    self.$notify({
+                        title: "Error",
+                        text: "Numero de Registro Patronal Duplicado.",
+                        type: 'warn'
+                    });
+                }else {
                     self.$notify({
                         title: "Error de registro",
                         text: "Ocurrio un error al registrar el Registro patronal.",
@@ -165,7 +201,16 @@ export default {
                     });
                 }
             })
-        }
+        },
+        obtenerPatronalBajas(){
+            const self = this;
+            self.$refs.tablaRegistroPatronalBaja.getRegistrosPatronalBaja();
+        },
+        obtenerPatronalActivos(){
+            const self = this;
+            self.$refs.tablaRegistroPatronal.getRegistrosPatronal();
+        },
+
     },
     mounted: function () {
 
