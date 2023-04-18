@@ -1,4 +1,5 @@
 <template>
+  
    <notifications style="z-index:1001110 ;" />
    <div style="width: 95%; margin-left: 2%;  margin-top: 1%; padding-top: 1%;">
 
@@ -21,15 +22,11 @@
 
          <v-col cols="2">
             <p style="font-size: 1em;text-align: center;">#Registro Patronal: </p>
-            <p style="font-weight: bolder; font-size: 1.8em;text-align: center;"> 0</p>
+            <p style="font-weight: bolder; font-size: 1.8em;text-align: center;"> {{ totalRegistroPatronal }}</p>
          </v-col>
       </v-row>
 
    </div>
-   
-   <!-- Navbar de opciones de navegacion -->
-   <navBar></navBar>
-    <!-- Fin navBar-->
 
 
    <v-card style="z-index: 0; height: 100%;  border-width:1px; background-color: white; ">
@@ -913,11 +910,9 @@ import axios from 'axios';
 import { isNull } from 'lodash';
 import tablaEmpleados from '../../components/tablaEmpleados.vue'
 import tablaBajas from '../../components/tablasBajas.vue'
-import navBar from '../general/navBar.vue'
 
 export default {
    components: {
-      navBar,
       EasyDataTable: window['vue3-easy-data-table'],
       tablaEmpleados: tablaEmpleados,
       tablaBajas: tablaBajas
@@ -935,6 +930,7 @@ export default {
          //Total de empleados
          totalEmpleadosActivos: 0,
          totalEmpleadosBaja: 0,
+         totalRegistroPatronal: 0,
 
          //permisos modulo
          nuevoEmpleado_dis: true,
@@ -1469,13 +1465,12 @@ export default {
          } else {
             ServiciosDisponibles = this.servicioSeleccionado
          }
-
          axios.post(this.entorno + 'empleados/getTotalEmpleados', {
             servicios: ServiciosDisponibles
          }).then(function (response) {
-
             self.totalEmpleadosActivos = response.data[0].activos
             self.totalEmpleadosBaja = response.data[0].bajas
+            self.totalRegistroPatronal = response.data[0].registroPatronal
          });
       },
       getPermisoArea() {

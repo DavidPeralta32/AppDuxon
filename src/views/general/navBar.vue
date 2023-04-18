@@ -28,8 +28,13 @@
                         <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
                             title="Capital Humano"></v-list-item>
                     </template>
-                    <v-list-item :to="{ name: 'Capital Humano' }" class="v-list-item__content" title="Empleados"
+                    <v-list-item :to="{ name: 'Empleados' }" class="v-list-item__content" title="Empleados"
                         value="Empleados">
+                    </v-list-item>
+
+                    <!--IMSS-->
+                    <v-list-item :to="{ name: 'IMSS' }" class="v-list-item__content" title="IMSS"
+                        value="Imss">
                     </v-list-item>
 
                 </v-list-group>
@@ -66,7 +71,7 @@
                         <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
                             title="Contabilidad"></v-list-item>
                     </template>
-                    <v-list-item :to="{ name: 'Contabilidad' }" class="v-list-item__content" title="Registro Patronal"
+                    <v-list-item :to="{ name: 'Registro_Patronal' }" class="v-list-item__content" title="Registro Patronal"
                         value="Registro Patronal">
                     </v-list-item>
                 </v-list-group>
@@ -95,6 +100,7 @@
             Cerrar sesión
         </v-btn>
     </v-app-bar>
+    <router-view></router-view>
 
 </template>
 

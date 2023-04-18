@@ -11,7 +11,7 @@ import { registerPlugins } from '@/plugins'
 
 //notificaciones
 import Notifications from '@kyvg/vue3-notification'
- 
+
 
 //routes
 import empleados from './views/RH/Empleados.vue'
@@ -26,76 +26,97 @@ import usuarios from './views/usuarios/usuarios.vue'
 import modulos from './views/usuarios/permisosModulos.vue'
 import servicios from './views/servicios/servicios.vue'
 import registroPatronal from './views/contabilidad/registroPatronal.vue'
+import Imss from './views/RH/Imss.vue'
+import navBar from './views/general/navBar.vue'
+
 
 const routes = [
-    { 
-    path:'/',
-    redirect:'/login',
+    {
+        path: '/',
+        redirect: '/login',
     },
-    {   
+    {
         name: 'login',
-        path:'/login',
+        path: '/login',
         component: login
     },
     {
-       
-        path: '/Capital_Humano',
-        name: 'Capital Humano',
-        component: empleados
+        //Routes para modulos de capital humano
+        path: '/Capital_Humano/', name: 'Capital Humano', component: navBar,
+        children: [
+            {
+                path: 'Empleados',
+                name: 'Empleados',
+                component: empleados
+            },
+            {
+                path: 'IMSS',
+                name: 'IMSS',
+                component: Imss
+            },  
+        ]
     },
+
     {
         name: 'dashboard',
-        path:'/dashboard',
+        path: '/dashboard',
         component: dashboard
     },
     {
         name: 'asistencia',
-        path:'/asistencia',
+        path: '/asistencia',
         component: asistenciaVac
     },
     {
         name: 'requisicion',
-        path:'/requisicion',
+        path: '/requisicion',
         component: requisicionPersonal
     },
     {
         name: 'permisos',
-        path:'/permisos',
+        path: '/permisos',
         component: permisosPersonal
     },
     {
-        path:'/expediente/:id?',
+        path: '/expediente/:id?',
         component: expediente
     },
     {
-        name:'usuarios',
-        path:'/usuarios',
+        name: 'usuarios',
+        path: '/usuarios',
         component: usuarios
     }
     ,
     {
-        name:'permisosModulos',
-        path:'/permisosModulos/:id?',
+        name: 'permisosModulos',
+        path: '/permisosModulos/:id?',
         component: modulos
     }
     ,
     {
-        name:'servicios',
-        path:'/servicios',
+        name: 'servicios',
+        path: '/servicios',
         component: servicios
     },
     {
-       
-        path: '/Contabilidad',
-        name: 'Contabilidad',
-        component: registroPatronal
-    }
+        //Route para modulos de contabilidad
+        path: '/Contabilidad/',name: 'Contabilidad', component: navBar,
+        children:[
+            {
+                path: 'Registro_Patronal',
+                name: 'Registro_Patronal',
+                 component: registroPatronal, 
+            }
+        ]
+
+    },
+    
 ]
-const router=createRouter(
+const router = createRouter(
     {
         history: createWebHashHistory(process.env.BASE_URL),
         routes: routes,
-        linkActiveClass:'active'
+        linkActiveClass: 'active'
     }
 );
 
@@ -107,9 +128,10 @@ app.config.globalProperties.$myGlobalVariable = "globalVariable"; //Para declara
 
 //app.use(BootstrapVue)
 app.use(router)
-app.use(Notifications) 
+app.use(Notifications)
 //app.use(BootstrapVue)
 registerPlugins(app)
+
 
 app.mount('#app')
 /*import "bootstrap/dist/js/bootstrap.js"

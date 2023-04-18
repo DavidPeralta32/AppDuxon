@@ -180,10 +180,11 @@
 <script>
 import router from '@/main';
 import axios from 'axios';
+import { defineComponent, ref } from "vue";
 //import routerView from "./components/router-view";
 //import menu from '../src/components/menu.vue'
 
-export default ({
+export default defineComponent({
   components: {
 
   },
@@ -523,9 +524,7 @@ export default ({
     }
   }
 
-}
-
-);
+})
 </script>
 <style>
 #fondo {

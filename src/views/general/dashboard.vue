@@ -7,6 +7,7 @@
   <v-col cols="4">
     <H2>DASHBOARD Proximamente...</H2>
   </v-col>
+ <!-- <tablaPrueba></tablaPrueba> -->
 
   <v-col cols="12">
     <v-img src="https://upload.wikimedia.org/wikipedia/commons/1/1e/SITIO-EN-CONSTRUCCION.jpg">
@@ -19,11 +20,13 @@
 <script>
 import router from '@/main';
 import { isNull } from 'lodash';
-import navBar from './navBar.vue'
+import navBar from './navBar.vue';
+import tablaPrueba from '../../components/tablaSeleccionarServicios.vue';
 
 export default {
   components:{
-    navBar
+    navBar,
+    tablaPrueba: tablaPrueba
   },
   data: () => ({
     permisoUsuario: false,
