@@ -593,7 +593,11 @@ export default ({
             });
         },
 
-        
+        /** asignarServicio
+         * @description Metodo que asigna los servicios seleccionados al registro patronal seleccionado
+         * @returns 
+         * @author DPA
+         */
         asignarServicio() {
             let self = this;
 
@@ -619,9 +623,23 @@ export default ({
             })
 
         },
+
+        /** splitIntoArray
+         * @description Metodo que  toma un número como argumento y lo convierte en una matriz de números separando las cifras del número original por comas..
+         * @param {json} num 
+         * @returns {Array} Array numerico
+         * @author DPA
+         */
         splitIntoArray(num) {
             return String(num).split(',').map(Number);
         },
+
+         /** getServiciosxId
+         * @description Metodo que obtiene los servicios por el #registro patronal 
+         * @param {string} p_nRegistroPatronal 
+         * @returns {json} servicios
+         * @author DPA
+         */
         async getServiciosxId(p_nRegistroPatronal) {
             let self = this;
             var servicios = '';
@@ -641,7 +659,11 @@ export default ({
             return servicios;
         },
 
-
+        /** getServiciosPrincipal
+         * @description Metodo que trae todos los servicios disponibles.
+         * @returns {json} servicios
+         * @author DPA
+         */
         getServiciosPrincipal() {
             let self = this;
             axios.post(this.entorno + 'contabilidad/getServiciosPrincipal', {

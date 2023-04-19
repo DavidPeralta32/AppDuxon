@@ -28,6 +28,8 @@ import servicios from './views/servicios/servicios.vue'
 import registroPatronal from './views/contabilidad/registroPatronal.vue'
 import Imss from './views/RH/Imss.vue'
 import navBar from './views/general/navBar.vue'
+import Departamentos from '@/views/RH/Departamentos.vue'
+import Puestos from '@/views/RH/Puestos.vue'
 
 
 const routes = [
@@ -53,7 +55,17 @@ const routes = [
                 path: 'IMSS',
                 name: 'IMSS',
                 component: Imss
-            },  
+            },
+            {
+                path: 'Departamentos',
+                name: 'Departamentos',
+                component: Departamentos
+            },
+            {
+                path: 'Puestos',
+                name: 'Puestos',
+                component: Puestos
+            }, 
         ]
     },
 

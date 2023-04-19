@@ -28,6 +28,8 @@
                         <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
                             title="Capital Humano"></v-list-item>
                     </template>
+
+                    <!--Empleados-->
                     <v-list-item :to="{ name: 'Empleados' }" class="v-list-item__content" title="Empleados"
                         value="Empleados">
                     </v-list-item>
@@ -35,6 +37,16 @@
                     <!--IMSS-->
                     <v-list-item :to="{ name: 'IMSS' }" class="v-list-item__content" title="IMSS"
                         value="Imss">
+                    </v-list-item>
+
+                     <!--Departamentos-->
+                     <v-list-item :to="{ name: 'Departamentos' }" class="v-list-item__content" title="Departamentos"
+                        value="Departamentos">
+                    </v-list-item>
+
+                    <!--Departamentos-->
+                    <v-list-item :to="{ name: 'Puestos' }" class="v-list-item__content" title="Puestos"
+                        value="Puestos">
                     </v-list-item>
 
                 </v-list-group>
