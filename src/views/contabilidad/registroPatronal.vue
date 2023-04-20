@@ -94,12 +94,6 @@
                             <v-text-field v-model="nPrimaRiesgo" type="number" step=0.01 min="0" label="Prima de Riesgo"
                                 variant="outlined" required density="compact" :rules="nameRules"></v-text-field>
                         </v-col>
-
-                        <!-- Numero de lementos -->
-                        <v-col cols="12" md="6">
-                            <v-text-field v-model="nElementos" type="number" min="0" max="1000" label="#Elementos"
-                                variant="outlined" required density="compact"></v-text-field>
-                        </v-col>
                     </v-row>
                     <v-divider style="margin-bottom: 20px;"></v-divider>
                     <v-row>
@@ -196,8 +190,7 @@ export default defineComponent({
                     sEstado: self.selectEstado,
                     sZonaCiudad: self.sZonaCiudad,
                     nSalarioMinimoZPR: self.nSalarioMinimoZPR,
-                    nPrimaRiesgo: self.nPrimaRiesgo,
-                    nElementos: self.nElementos
+                    nPrimaRiesgo: self.nPrimaRiesgo
                 }).then(function (response) {
                     var res = response.data.affectedRows;
                     if (res == '1') {

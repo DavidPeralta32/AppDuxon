@@ -4,7 +4,7 @@
     <notifications style="z-index:1001110 ;" />
 
     <EasyDataTable :headers="headers" :items="itemsRegistrosPatronal" buttons-pagination table-class-name="customize-table"
-        :search-value="valorCampo" :loading="isLoading" empty-message="No se encontraron registros patronales">
+        :search-value="valorCampo" :loading="isLoading" empty-message="No se encontraron registros patronales" rowsPerPageMessage="Registros Patronales por pagina:">
 
         <template #item-Opciones="{ nRegistroPatronal }">
             <v-menu>
@@ -121,11 +121,11 @@
                                 variant="outlined" required density="compact" :rules="nameRules"></v-text-field>
                         </v-col>
 
-                        <!-- Numero de lementos -->
+                        <!-- Numero de lementos 
                         <v-col cols="12" md="6">
                             <v-text-field v-model="nElementos" type="number" min="0" max="1000" label="#Elementos"
                                 variant="outlined" required density="compact"></v-text-field>
-                        </v-col>
+                        </v-col>-->
                     </v-row>
                     <v-divider style="margin-bottom: 20px;"></v-divider>
                     <v-row>
@@ -203,11 +203,11 @@
                                 variant="outlined" required density="compact" readonly></v-text-field>
                         </v-col>
 
-                        <!-- Numero de lementos -->
+                        <!-- Numero de lementos 
                         <v-col cols="12" md="6">
                             <v-text-field v-model="nElementos" type="number" min="0" max="1000" label="#Elementos"
                                 variant="outlined" required density="compact" readonly></v-text-field>
-                        </v-col>
+                        </v-col>-->
                     </v-row>
                 </v-form>
 
@@ -219,7 +219,6 @@
                         buttons-pagination table-class-name="customize-table" :search-value="valorCampo"
                         empty-message="No tiene servicios asignados" style="width: 90%;">
                     </EasyDataTable>
-
                 </div>
             </v-container>
         </v-card>
@@ -475,7 +474,6 @@ export default ({
                     selectEstado: self.selectEstado,
                     nSalarioMinimoZRP: self.nSalarioMinimoZRP,
                     PrimaDeRiesgo: self.PrimaDeRiesgo,
-                    nElementos: self.nElementos,
                 }).then(function (response) {
                     console.log(response);
                     if (response.data.affectedRows == '1') {
@@ -609,9 +607,10 @@ export default ({
 
                     self.$notify({
                         title: "OK",
-                        text: "Los servicios han sido asignados",
+                        text: "Los servicios han sido asignados con exito",
                         type: 'success'
                     });
+                    self.getRegistrosPatronal();
                     self.dialogAsignarServicios = false
                 } else {
                     self.$notify({
