@@ -19,7 +19,7 @@
             <v-container style="z-index: 0; width: 100%;  border-width:1px; background-color: white;">
                 <div
                     style="z-index: 0; width: 100%;  border-width:1px; background-color: white;text-align: end;margin-bottom: 16px; ">
-                    <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-account-multiple-plus-outline"
+                    <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-plus-circle-outline"
                         color="blue" bg-color="white" @click="nuevoRegistroPatronal()">Agregar</v-btn>
                 </div>
 
