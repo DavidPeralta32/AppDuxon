@@ -1,104 +1,99 @@
 <template>
-    <v-navigation-drawer style="color: white; font-size: 1em; margin: 0;padding: 0px;border: 0;" color="rgba(43,49,61)"
-        v-model="drawer" app>
-        <v-sheet color="white" style="width:100%; " class="pa-2">
+    <v-navigation-drawer v-model="drawer" app class="navbar">
+        <v-sheet class="pa-2">
             <!--Icono de avatar-->
-
-            <div style="width:200px;  text-align: center; ">
+            <div class="contendor-menu-img">
                 <img style="width: 80%;" src="../fondos/LogoDuxon.svg">
             </div>
-
         </v-sheet>
         <v-divider></v-divider>
 
         <!--OTRA LISTA DE ITEMS EN NAVEGACIÓN-->
+        <div class="navbar-contenedor">
+            <v-list density="compact" nav style=" margin: 0;padding: 0px;">
+                <v-list-item :to="{ name: 'dashboard' }" prepend-icon="mdi-home-city" title="Inicio" value="home">
+                </v-list-item>
 
+                <!--Capital Humano modulo-->
+                <div>
+                    <v-list-group class="v-list-item__content:hover" value="capitalHumanoMenu" style="position: relative; ">
+                        <template v-slot:activator="{ props }">
+                            <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
+                                title="Capital Humano"></v-list-item>
+                        </template>
 
-        <v-list density="compact" nav style=" margin: 0;padding: 0px;">
-            <v-list-item :to="{ name: 'dashboard' }" prepend-icon="mdi-home-city" title="Inicio" value="home">
-            </v-list-item>
+                        <!--Empleados-->
+                        <v-list-item :to="{ name: 'Empleados' }" class="v-list-item__content" title="Empleados"
+                            value="Empleados">
+                        </v-list-item>
 
+                        <!--IMSS-->
+                        <v-list-item :to="{ name: 'IMSS' }" class="v-list-item__content" title="IMSS" value="Imss">
+                        </v-list-item>
 
+                        <!--Departamentos-->
+                        <v-list-item :to="{ name: 'Departamentos' }" class="v-list-item__content" title="Departamentos"
+                            value="Departamentos">
+                        </v-list-item>
 
+                        <!--Departamentos-->
+                        <v-list-item :to="{ name: 'Puestos' }" class="v-list-item__content" title="Puestos" value="Puestos">
+                        </v-list-item>
 
-            <!--Capital Humano modulo-->
-            <div>
-                <v-list-group class="v-list-item__content:hover" value="capitalHumanoMenu" style="position: relative; ">
-                    <template v-slot:activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
-                            title="Capital Humano"></v-list-item>
-                    </template>
+                    </v-list-group>
 
-                    <!--Empleados-->
-                    <v-list-item :to="{ name: 'Empleados' }" class="v-list-item__content" title="Empleados"
-                        value="Empleados">
+                    <!-- Almacén-->
+                    <v-list-group v-if="almacen_show" class="v-list-item__content:hover" value="AlmacenMenu"
+                        style="position: relative; ">
+                        <template v-slot:activator="{ props }">
+                            <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
+                                title="Almacén"></v-list-item>
+                        </template>
+                        <v-list-item to="" class="v-list-item__content" title="Empleados" value="">
+                        </v-list-item>
+
+                    </v-list-group>
+
+                    <v-list-group v-if="Usuarios_show" class="v-list-item__content:hover" style="position: relative; ">
+                        <template v-slot:activator="{ props }">
+                            <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
+                                title="Admon. Usuarios"></v-list-item>
+                        </template>
+                        <v-list-item :to="{ name: 'usuarios' }" class="v-list-item__content" title="Usuarios" value="">
+                        </v-list-item>
+                    </v-list-group>
+                </div>
+                <!--FIN Capital Humano modulo-->
+
+                <!-- Contabilidad modulos -->
+                <div>
+                    <v-list-group class="v-list-item__content:hover" value="contabilidadMenu" style="position: relative; ">
+                        <template v-slot:activator="{ props }">
+                            <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
+                                title="Contabilidad"></v-list-item>
+                        </template>
+                        <v-list-item :to="{ name: 'Registro_Patronal' }" class="v-list-item__content"
+                            title="Registro Patronal" value="Registro Patronal">
+                        </v-list-item>
+                    </v-list-group>
+                </div>
+                <!-- Fin modulos contabilidad -->
+
+                <div>
+                    <v-list-item :to="{ name: 'servicios' }" v-show="permisoUsuario" prepend-icon="mdi-home-city"
+                        title="Servicios" value="Servicios">
                     </v-list-item>
+                </div>
 
-                    <!--IMSS-->
-                    <v-list-item :to="{ name: 'IMSS' }" class="v-list-item__content" title="IMSS"
-                        value="Imss">
+                <div>
+                    <v-list-item :to="{ name: 'usuarios' }" v-show="permisoUsuario" prepend-icon="mdi-home-city"
+                        title="Usuarios" value="Usuarios">
                     </v-list-item>
-
-                     <!--Departamentos-->
-                     <v-list-item :to="{ name: 'Departamentos' }" class="v-list-item__content" title="Departamentos"
-                        value="Departamentos">
-                    </v-list-item>
-
-                    <!--Departamentos-->
-                    <v-list-item :to="{ name: 'Puestos' }" class="v-list-item__content" title="Puestos"
-                        value="Puestos">
-                    </v-list-item>
-
-                </v-list-group>
-
-                <!-- Almacén-->
-                <v-list-group v-if="almacen_show" class="v-list-item__content:hover" value="AlmacenMenu"
-                    style="position: relative; ">
-                    <template v-slot:activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
-                            title="Almacén"></v-list-item>
-                    </template>
-                    <v-list-item to="" class="v-list-item__content" title="Empleados" value="">
-                    </v-list-item>
-
-                </v-list-group>
-
-                <v-list-group v-if="Usuarios_show" class="v-list-item__content:hover" style="position: relative; ">
-                    <template v-slot:activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
-                            title="Admon. Usuarios"></v-list-item>
-                    </template>
-                    <v-list-item :to="{ name: 'usuarios' }" class="v-list-item__content" title="Usuarios" value="">
-                    </v-list-item>
-                </v-list-group>
-            </div>
+                </div>
+            </v-list>
+        </div>
 
 
-            <!--FIN Capital Humano modulo-->
-
-            <!-- Contabilidad modulos -->
-            <div>
-                <v-list-group class="v-list-item__content:hover" value="contabilidadMenu" style="position: relative; ">
-                    <template v-slot:activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
-                            title="Contabilidad"></v-list-item>
-                    </template>
-                    <v-list-item :to="{ name: 'Registro_Patronal' }" class="v-list-item__content" title="Registro Patronal"
-                        value="Registro Patronal">
-                    </v-list-item>
-                </v-list-group>
-            </div>
-        </v-list>
-        <!-- Fin modulos contabilidad -->
-
-
-        <v-list-item :to="{ name: 'servicios' }" v-show="permisoUsuario" prepend-icon="mdi-home-city" title="Servicios"
-            value="Servicios">
-        </v-list-item>
-
-        <v-list-item :to="{ name: 'usuarios' }" v-show="permisoUsuario" prepend-icon="mdi-home-city" title="Usuarios"
-            value="Usuarios">
-        </v-list-item>
     </v-navigation-drawer>
 
 
@@ -113,7 +108,6 @@
         </v-btn>
     </v-app-bar>
     <router-view></router-view>
-
 </template>
 
 <script >
@@ -171,4 +165,63 @@ export default {
         },
     }
 }
+
+//background-color: rgba(43, 49, 61);
+//background-image: url("../fondos/backprueba.jpg");
 </script>
+
+<style>
+.navbar {
+    color: white;
+    font-size: 1em;
+    margin: 0;
+    padding: 0px;
+    border: 0;
+    background-image: url("../fondos/fondo_negro.png");
+}
+
+.pa-2 {
+    height: 100px;
+    width: 100%;
+    align-items: center;
+    display: flex;
+
+}
+
+.contendor-menu-img {
+    width: 200px;
+    text-align: center;
+    height: 100%;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.contendor-menu-img img {
+    height: 50px;
+}
+
+.navbar-contenedor .v-list,
+.navbar-contenedor .v-list-item {
+    margin: 10px !important;
+    border-radius: 18px;
+    width: auto;
+    color: black;
+}
+
+
+
+.navbar-contenedor .v-list-item-title {
+    color: black;
+    font-weight: bold;
+}
+
+
+.navbar-contenedor .v-list,
+.navbar-contenedor .v-list--nav {
+    background-color: white !important;
+    opacity: 0.8;
+    border: 2px solid white;
+}
+
+</style>
