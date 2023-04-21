@@ -4,7 +4,8 @@
     <notifications style="z-index:1001110 ;" />
 
     <EasyDataTable :headers="headers" :items="itemsRegistrosPatronal" buttons-pagination table-class-name="customize-table"
-        :search-value="valorCampo" :loading="isLoading" empty-message="No se encontraron registros patronales" rowsPerPageMessage="Registros Patronales por pagina:">
+        :search-value="valorCampo" :loading="isLoading" empty-message="No se encontraron registros patronales"
+        rowsPerPageMessage="Registros Patronales por pagina:">
 
         <template #item-Opciones="{ nRegistroPatronal }">
             <v-menu>
@@ -21,7 +22,7 @@
                     </v-list-item>
                     <v-divider></v-divider>
 
-                    <v-list-item>
+                    <v-list-item @click="abrirDialogTarjetaLaboral(nRegistroPatronal)">
                         <v-list-item-title>Tarjeta laboral</v-list-item-title>
                     </v-list-item>
                     <v-list-item @click="abrirModalAsignarServicio(nRegistroPatronal)">
@@ -246,10 +247,10 @@
             <v-container style="margin-top: 80px;">
                 <v-row style="margin-left: 1%;">
                     <v-col cols="12" md="12">
-                    <v-autocomplete v-model="selectServicios" label="Selección de servicios" multiple="true"
-                        :items="servicios" item-title="nombre" item-value="idServicio" variant="outlined" required
-                        :rules="nameRules" density="compact"></v-autocomplete>
-                        
+                        <v-autocomplete v-model="selectServicios" label="Selección de servicios" multiple="true"
+                            :items="servicios" item-title="nombre" item-value="idServicio" variant="outlined" required
+                            :rules="nameRules" density="compact"></v-autocomplete>
+
                     </v-col>
                 </v-row>
             </v-container>
@@ -275,13 +276,42 @@
         </v-card>
     </v-dialog>
     <!-- FIN Modal Asignar servicio-->
+
+    <!-- Modal Tarjeta laboral-->
+    <v-row justify="center">
+        <v-dialog v-model="dialogAñadirTarjetaLaboral" persistent max-width="550">
+
+            <v-card>
+                <v-card-title class="text-h5">
+                    Agregar URL del archivo
+                </v-card-title>
+                <v-card-text>
+                    <!--<v-text-field v-model="urlTarjetaLaboral" label="URL" density="compact" variant="outlined"
+                        :rules="inputsCargarURL">
+                    </v-text-field>-->
+
+                    <v-file-input v-model="urlTarjetaLaboral" placeholder="Subir Archivo" label="Subir Archivo"
+                        density="compact" variant="outlined" prepend-icon="mdi-archive" />
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="green darken-1" text @click="dialogAñadirTarjetaLaboral = false">
+                        Cancelar
+                    </v-btn>
+                    <v-btn color="green darken-1" text @click="añadirUrlTarjetaLaboral()">
+                        Agregar URL
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+    </v-row>
+    <!-- FIN Modal Tarjeta laboral-->
 </template>
 
 <script>
 import axios from 'axios'
 import { isEmpty } from 'lodash';
 import { ref } from "vue";
-
 
 export default ({
     components: {
@@ -305,6 +335,15 @@ export default ({
             nameRules: [
                 v => !!v || 'Campo requerido'
 
+            ],
+
+            inputsCargarURL: [
+                value => !!value || 'Campo requerido.',
+                //value => (value || '').length <= 20 || 'Max 20 characters',
+                value => {
+                    const pattern = /^(ht|f)tps?:\/\/\w+([\.\-\w]+)?\.dropbox\.com.*?$/
+                    return pattern.test(value) || 'URL Invalida.'
+                },
             ],
 
             nRegistroPatronal: "",
@@ -351,6 +390,7 @@ export default ({
             dialogEditarRegistroPatronal: false,
             dialogVerRegistroPatronal: false,
             dialogAsignarServicios: false,
+            dialogAñadirTarjetaLaboral: false,
             selected: '',
             selectServicios: {},
             servicios: '',
@@ -358,11 +398,13 @@ export default ({
             estados: ["Extranjero", "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila de Zaragoza", "Colima", "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo", "Jalisco", "Michoacán de Ocampo", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz de Ignacio de la Llave", "Yucatán", "Zacatecas"],
             valid: true,
             isLoading: true,
+            urlTarjetaLaboral: "",
 
 
         }
     },
     watch: {
+
     },
     methods: {
         /** getRegistrosPatronal
@@ -633,12 +675,12 @@ export default ({
             return String(num).split(',').map(Number);
         },
 
-         /** getServiciosxId
-         * @description Metodo que obtiene los servicios por el #registro patronal 
-         * @param {string} p_nRegistroPatronal 
-         * @returns {json} servicios
-         * @author DPA
-         */
+        /** getServiciosxId
+        * @description Metodo que obtiene los servicios por el #registro patronal 
+        * @param {string} p_nRegistroPatronal 
+        * @returns {json} servicios
+        * @author DPA
+        */
         async getServiciosxId(p_nRegistroPatronal) {
             let self = this;
             var servicios = '';
@@ -671,6 +713,41 @@ export default ({
                 self.servicios = response.data
             });
 
+        },
+
+        abrirDialogTarjetaLaboral(p_nRegistroPatronal) {
+            this.nRegistroPatronal = p_nRegistroPatronal;
+            this.dialogAñadirTarjetaLaboral = true;
+        },
+
+        añadirUrlTarjetaLaboral() {
+            let self = this;
+
+            const formData = new FormData();
+            formData.append('document', this.urlTarjetaLaboral);
+
+            axios.post(this.entorno + 'contabilidad/actualizarUrlTarjetaLAboral', {
+                nRegistroPatronal: self.nRegistroPatronal,
+                url: formData
+            }).then(function (response) {
+                var res = response.data.affectedRows;
+                if (res == '1') {
+                    self.$notify({
+                        title: "OK",
+                        text: "La URL se ha ingresado con exito.",
+                        type: 'success'
+                    });
+                    self.getDocumentos(self.$route.params.id)
+                    self.dialogAñadirArchivo = false;
+
+                } else {
+                    self.$notify({
+                        title: "Error de registro",
+                        text: "Ocurrio un error al ingresar el URL para el documento.",
+                        type: 'warn'
+                    });
+                }
+            })
         },
 
     },
