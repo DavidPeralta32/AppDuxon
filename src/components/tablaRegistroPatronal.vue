@@ -280,28 +280,33 @@
     <!-- Modal Tarjeta laboral-->
     <v-row justify="center">
         <v-dialog v-model="dialogAñadirTarjetaLaboral" persistent max-width="550">
-
             <v-card>
                 <v-card-title class="text-h5">
                     Agregar URL del archivo
                 </v-card-title>
-                <v-card-text>
-                    <!--<v-text-field v-model="urlTarjetaLaboral" label="URL" density="compact" variant="outlined"
-                        :rules="inputsCargarURL">
-                    </v-text-field>-->
+                <v-row style="padding: 2%;">
+                    <v-col cols="6" md="6" v-if="sRutaArchivoTarjetaLaboral != ''">
+                        <a @click="descargarArchivo()"><span class="mdi mdi-arrow-down-bold-box"></span> {{
+                            sRutaArchivoTarjetaLaboral }}</a>
+                    </v-col>
+                    <v-col cols="12" md="12">
+                        <form @submit.prevent="añadirUrlTarjetaLaboral" ref='uploadForm' id='uploadForm' method='post'
+                            encType="multipart/form-data">
+                            <v-file-input type="file" name="sampleFile" placeholder="Subir Archivo" label="Subir Archivo"
+                                density="compact" ref="sampleFile" variant="outlined" prepend-icon="mdi-archive" />
 
-                    <v-file-input v-model="urlTarjetaLaboral" placeholder="Subir Archivo" label="Subir Archivo"
-                        density="compact" variant="outlined" prepend-icon="mdi-archive" />
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="green darken-1" text @click="dialogAñadirTarjetaLaboral = false">
-                        Cancelar
-                    </v-btn>
-                    <v-btn color="green darken-1" text @click="añadirUrlTarjetaLaboral()">
-                        Agregar URL
-                    </v-btn>
-                </v-card-actions>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="green darken-1" text @click="dialogAñadirTarjetaLaboral = false">
+                                    Cancelar
+                                </v-btn>
+                                <v-btn color="green darken-1" text type="submit">
+                                    Agregar URL
+                                </v-btn>
+                            </v-card-actions>
+                        </form>
+                    </v-col>
+                </v-row>
             </v-card>
         </v-dialog>
     </v-row>
@@ -359,6 +364,7 @@ export default ({
             nombre: "",
             contrato: "",
             EstadoServicio: "",
+            docTarjectaLaboral: "",
 
             //Tabla registro patronal
             headers: [
@@ -398,7 +404,7 @@ export default ({
             estados: ["Extranjero", "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila de Zaragoza", "Colima", "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo", "Jalisco", "Michoacán de Ocampo", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz de Ignacio de la Llave", "Yucatán", "Zacatecas"],
             valid: true,
             isLoading: true,
-            urlTarjetaLaboral: "",
+            sRutaArchivoTarjetaLaboral: "",
 
 
         }
@@ -715,21 +721,42 @@ export default ({
 
         },
 
-        abrirDialogTarjetaLaboral(p_nRegistroPatronal) {
+        async abrirDialogTarjetaLaboral(p_nRegistroPatronal) {
             this.nRegistroPatronal = p_nRegistroPatronal;
+            await this.traerRutaTarjetaLaboral(p_nRegistroPatronal);
             this.dialogAñadirTarjetaLaboral = true;
         },
 
-        añadirUrlTarjetaLaboral() {
+        traerRutaTarjetaLaboral(p_nRegistroPatronal) {
+            let self = this;
+            axios.post(this.entorno + 'contabilidad/traerRutaTarjetaLaboral', {
+                nRegistroPatronal: p_nRegistroPatronal
+            }).then(function (response) {
+                if (response.data.length > 0) {
+                    self.sRutaArchivoTarjetaLaboral = response.data[0].sUrlTarjetaLaboral;
+                } else {
+                    self.sRutaArchivoTarjetaLaboral = "";
+                }
+
+            });
+        },
+
+        async añadirUrlTarjetaLaboral() {
             let self = this;
 
+            const file = this.$refs.sampleFile.files[0];
             const formData = new FormData();
-            formData.append('document', this.urlTarjetaLaboral);
+            formData.append('sampleFile', file);
 
-            axios.post(this.entorno + 'contabilidad/actualizarUrlTarjetaLAboral', {
-                nRegistroPatronal: self.nRegistroPatronal,
-                url: formData
-            }).then(function (response) {
+            await axios.post(self.entorno + 'contabilidad/actualizarUrlTarjetaLaboral', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                params: {
+                    nRegistroPatronal: self.nRegistroPatronal
+                }
+            }
+            ).then(function (response) {
                 var res = response.data.affectedRows;
                 if (res == '1') {
                     self.$notify({
@@ -737,10 +764,20 @@ export default ({
                         text: "La URL se ha ingresado con exito.",
                         type: 'success'
                     });
-                    self.getDocumentos(self.$route.params.id)
-                    self.dialogAñadirArchivo = false;
-
-                } else {
+                    self.dialogAñadirTarjetaLaboral = false;
+                } else if (response.data.mensaje == "Solo se permiten archivos PDF.") {
+                    self.$notify({
+                        title: "Error de registro",
+                        text: "Solo se permiten archivos PDF.",
+                        type: 'warn'
+                    });
+                } else if(response.data.mensaje == "No se selecciono ningun archivo."){
+                    self.$notify({
+                        title: "Error de registro",
+                        text: "No se selecciono ningun archivo.",
+                        type: 'warn'
+                    });
+                }else {
                     self.$notify({
                         title: "Error de registro",
                         text: "Ocurrio un error al ingresar el URL para el documento.",
@@ -750,9 +787,54 @@ export default ({
             })
         },
 
+        async descargarArchivo() {
+            const self = this;
+            try {
+                // Pass the file path as a query parameter
+                const response = await axios.get(`${self.entorno}contabilidad/descargarArchivo?sRutaArchivo=${self.sRutaArchivoTarjetaLaboral}`, {
+                    responseType: 'blob',
+                });
+                if (response == "Solo se permiten archivos PDF.") {
+                    
+                } else {
+                    // Crear un objeto URL a partir del blob   MediaSource
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    //const url = window.URL.createObjectURL([response.data]);
+
+                    // Crear un elemento <a> para descargar el archivo
+                    const link = document.createElement('a');
+                    link.href = url;
+                    //link.setAttribute('download', 'TarjetaLaboral');
+                    link.download = "TarjetaLaboral.pdf";
+                    document.body.appendChild(link);
+
+                    // Simular un clic en el enlace para iniciar la descarga
+                    link.click();
+
+                    // Liberar el objeto URL
+                    window.URL.revokeObjectURL(url);
+                }
+
+
+            } catch (error) {
+                console.error(error);
+            }
+        },
+
+
     },
 });
 
 
 
 </script>
+
+<style>
+
+a{
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+</style>
