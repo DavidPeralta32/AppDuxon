@@ -177,7 +177,10 @@ export default {
     margin: 0;
     padding: 0px;
     border: 0;
-    background-image: url("../fondos/fondo_negro.png");
+    background-color: rgba(0, 0, 0, 0.9);
+}
+.navbar.contain{
+  object-fit: contain;
 }
 
 .pa-2 {
@@ -207,14 +210,17 @@ export default {
     border-radius: 18px;
     width: auto;
     color: black;
-}
-
-
-
-.navbar-contenedor .v-list-item-title {
-    color: black;
     font-weight: bold;
 }
+
+.navbar-contenedor .v-list:hover,
+.navbar-contenedor .v-list-item:hover {
+    color: white;
+}
+
+
+
+
 
 
 .navbar-contenedor .v-list,
