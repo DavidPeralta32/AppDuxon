@@ -49,8 +49,13 @@ const routes = [
             {
                 path: 'Empleados',
                 name: 'Empleados',
-                component: empleados
-            },
+                component: empleados       
+            }, 
+            {
+                path: 'expediente/:id?',
+                name:'expediente',
+                component: expediente
+            },         
             {
                 path: 'IMSS',
                 name: 'IMSS',
@@ -65,7 +70,7 @@ const routes = [
                 path: 'Puestos',
                 name: 'Puestos',
                 component: Puestos
-            }, 
+            },
         ]
     },
 
@@ -90,10 +95,6 @@ const routes = [
         component: permisosPersonal
     },
     {
-        path: '/expediente/:id?',
-        component: expediente
-    },
-    {
         name: 'usuarios',
         path: '/usuarios',
         component: usuarios
@@ -103,8 +104,7 @@ const routes = [
         name: 'permisosModulos',
         path: '/permisosModulos/:id?',
         component: modulos
-    }
-    ,
+    },
     {
         name: 'servicios',
         path: '/servicios',
@@ -112,17 +112,17 @@ const routes = [
     },
     {
         //Route para modulos de contabilidad
-        path: '/Contabilidad/',name: 'Contabilidad', component: navBar,
-        children:[
+        path: '/Contabilidad/', name: 'Contabilidad', component: navBar,
+        children: [
             {
                 path: 'Registro_Patronal',
                 name: 'Registro_Patronal',
-                 component: registroPatronal, 
+                component: registroPatronal,
             }
         ]
 
     },
-    
+
 ]
 const router = createRouter(
     {

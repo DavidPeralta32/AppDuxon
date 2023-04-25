@@ -667,6 +667,7 @@ import PizZipUtils from "pizzip/utils/index.js";
 import { saveAs } from "file-saver";
 import router from '@/main';
 import ImageModule from "docxtemplater-image-module-free";
+import navBar from '../views/general/navBar.vue';
 
 
 import axios from 'axios';
@@ -1651,7 +1652,7 @@ export default ({
       return edad;
     },
     verExpediente(id) {
-      router.push({ path: "/expediente/" + id })
+      router.push({path: "/Capital_Humano/expediente/" + id,})
     },
     renderDoc() {
       this.loadFile('src\\templatesDoc\\Hoja de Vida template.docx', function (

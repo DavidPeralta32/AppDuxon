@@ -279,12 +279,21 @@
 
     <!-- Modal Tarjeta laboral-->
     <v-row justify="center">
-        <v-dialog v-model="dialogAñadirTarjetaLaboral" persistent max-width="550">
+        <v-dialog v-model="dialogAñadirTarjetaLaboral" persistent max-width="60%">
             <v-card>
-                <v-card-title class="text-h5">
-                    Agregar URL del archivo
-                </v-card-title>
-                <v-row style="padding: 2%;">
+                <v-toolbar color="primary" dark style="position: fixed;z-index: 100; width: 100%;">
+                    <div class="toolbar-titulo">
+                        <div class="texto">
+                            <h2 style="margin-left: 20px">Agregar Tarjeta Laboral</h2>
+                        </div>
+                        <div class="icon_close">
+                            <v-btn icon dark @click="dialogAñadirTarjetaLaboral = false" style="margin-right: 8px;">
+                                <v-icon>mdi-close</v-icon></v-btn>
+                        </div>
+                    </div>
+                </v-toolbar>
+
+                <v-row style="padding: 2%; margin-top: 60px;">
                     <v-col cols="6" md="6" v-if="sRutaArchivoTarjetaLaboral != ''">
                         <a @click="descargarArchivo()"><span class="mdi mdi-arrow-down-bold-box"></span> {{
                             sRutaArchivoTarjetaLaboral }}</a>
@@ -292,17 +301,34 @@
                     <v-col cols="12" md="12">
                         <form @submit.prevent="añadirUrlTarjetaLaboral" ref='uploadForm' id='uploadForm' method='post'
                             encType="multipart/form-data">
-                            <v-file-input type="file" name="sampleFile" placeholder="Subir Archivo" label="Subir Archivo"
+                            <v-file-input type="file" name="sampleFile" accept="application/pdf" placeholder="Subir Archivo" label="Subir Archivo"
                                 density="compact" ref="sampleFile" variant="outlined" prepend-icon="mdi-archive" />
+                            <template v-if="visualizarTarjetaLaboral != ''">
+                                <div class="visualizador-pdf" style="width: 100%; height: 450px ;overflow: scroll;">
+                                    <vue-pdf-embed :source="visualizarTarjetaLaboral" :page="1" />
+                                </div>
+                            </template>
 
+                            <v-spacer></v-spacer>
+                            <!--Botones de acciones -->
                             <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn color="green darken-1" text @click="dialogAñadirTarjetaLaboral = false">
-                                    Cancelar
-                                </v-btn>
-                                <v-btn color="green darken-1" text type="submit">
-                                    Agregar URL
-                                </v-btn>
+                                <v-row>
+                                    <v-col cols="3">
+                                        <v-btn text @click="dialogAñadirTarjetaLaboral = false"
+                                            style="vertical-align: bottom; background: red;" color="white">
+                                            Cancelar
+                                        </v-btn>
+                                    </v-col>
+
+                                    <v-col cols="6">
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <v-btn text type="submit" small style="vertical-align: bottom; background: #1867c0;"
+                                            color="white">
+                                            Agregar archivo
+                                        </v-btn>
+                                    </v-col>
+                                </v-row>
                             </v-card-actions>
                         </form>
                     </v-col>
@@ -317,12 +343,15 @@
 import axios from 'axios'
 import { isEmpty } from 'lodash';
 import { ref } from "vue";
+import VuePdfEmbed from 'vue-pdf-embed';
 
 export default ({
     components: {
         EasyDataTable: window['vue3-easy-data-table'],
         Header: window['vue3-easy-data-table'],
         Item: window['vue3-easy-data-table'],
+        VuePdfEmbed,
+
     },
     created() {
         this.getRegistrosPatronal();
@@ -405,6 +434,7 @@ export default ({
             valid: true,
             isLoading: true,
             sRutaArchivoTarjetaLaboral: "",
+            visualizarTarjetaLaboral: "",
 
 
         }
@@ -721,19 +751,38 @@ export default ({
 
         },
 
+        /**abrirDialogTarjetaLaboral
+         * @description Metodo que abre el dialog para abrir la tarjeta laboral del rgistro patronal
+         * @param {string} p_nRegistroPatronal 
+         * @author DPA
+         */
         async abrirDialogTarjetaLaboral(p_nRegistroPatronal) {
+            this.visualizarTarjetaLaboral = "";
             this.nRegistroPatronal = p_nRegistroPatronal;
             await this.traerRutaTarjetaLaboral(p_nRegistroPatronal);
             this.dialogAñadirTarjetaLaboral = true;
+
+
+
         },
 
-        traerRutaTarjetaLaboral(p_nRegistroPatronal) {
+        /**traerRutaTarjetaLaboral
+         * @description Metodo que consulta a la base de datos para traer el nombre con el que se guardo su tarjeta laboral
+         * @param {string} p_nRegistroPatronal se usa para saber de que registro patronal se hara la consulta
+         * @author DPA
+         */
+        async traerRutaTarjetaLaboral(p_nRegistroPatronal) {
             let self = this;
-            axios.post(this.entorno + 'contabilidad/traerRutaTarjetaLaboral', {
+            await axios.post(this.entorno + 'contabilidad/traerRutaTarjetaLaboral', {
                 nRegistroPatronal: p_nRegistroPatronal
             }).then(function (response) {
                 if (response.data.length > 0) {
                     self.sRutaArchivoTarjetaLaboral = response.data[0].sUrlTarjetaLaboral;
+                    if (response.data[0].sUrlTarjetaLaboral != "") {
+                        self.visualizarTarjetaLaboral = self.entorno + response.data[0].sUrlTarjetaLaboral + ".pdf";
+                    } else {
+                        self.visualizarTarjetaLaboral = "";
+                    }
                 } else {
                     self.sRutaArchivoTarjetaLaboral = "";
                 }
@@ -741,6 +790,10 @@ export default ({
             });
         },
 
+        /** añadirUrlTarjetaLaboral
+         * @description Metodo que guarda en el servidor el documento de tarjeta laboral y agrega el nombre del documento a la base de datos
+         * @author DPA
+         */
         async añadirUrlTarjetaLaboral() {
             let self = this;
 
@@ -758,10 +811,10 @@ export default ({
             }
             ).then(function (response) {
                 var res = response.data.affectedRows;
-                if (res == '1') {
+                if (response.data.status == 'OK') {
                     self.$notify({
                         title: "OK",
-                        text: "La URL se ha ingresado con exito.",
+                        text: "El archivo se ha ingresado con exito.",
                         type: 'success'
                     });
                     self.dialogAñadirTarjetaLaboral = false;
@@ -771,22 +824,26 @@ export default ({
                         text: "Solo se permiten archivos PDF.",
                         type: 'warn'
                     });
-                } else if(response.data.mensaje == "No se selecciono ningun archivo."){
+                } else if (response.data.mensaje == "No se selecciono ningun archivo.") {
                     self.$notify({
                         title: "Error de registro",
                         text: "No se selecciono ningun archivo.",
                         type: 'warn'
                     });
-                }else {
+                } else {
                     self.$notify({
                         title: "Error de registro",
-                        text: "Ocurrio un error al ingresar el URL para el documento.",
+                        text: "Ocurrio un error al ingresar el archivo.",
                         type: 'warn'
                     });
                 }
             })
         },
 
+        /** descargarArchivo
+         * @description Metodo que descarga el documento de tarjeta laboral del servidor.
+         * @author DPA
+         */
         async descargarArchivo() {
             const self = this;
             try {
@@ -795,7 +852,7 @@ export default ({
                     responseType: 'blob',
                 });
                 if (response == "Solo se permiten archivos PDF.") {
-                    
+
                 } else {
                     // Crear un objeto URL a partir del blob   MediaSource
                     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -830,11 +887,9 @@ export default ({
 </script>
 
 <style>
-
-a{
+a {
     color: blue;
     text-decoration: underline;
     cursor: pointer;
 }
-
 </style>
