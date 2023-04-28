@@ -34,11 +34,6 @@
                         value="Empleados">
                     </v-list-item>
 
-                    <!--IMSS-->
-                    <v-list-item :to="{ name: 'IMSS' }" class="v-list-item__content" title="IMSS"
-                        value="Imss">
-                    </v-list-item>
-
                      <!--Departamentos-->
                      <v-list-item :to="{ name: 'Departamentos' }" class="v-list-item__content" title="Departamentos"
                         value="Departamentos">
@@ -86,6 +81,18 @@
                     <v-list-item :to="{ name: 'Registro_Patronal' }" class="v-list-item__content" title="Registro Patronal"
                         value="Registro Patronal">
                     </v-list-item>
+
+                    <!--IMSS-->
+                    <v-list-group class="v-list-item__content:hover" value="imssMenu" style="position: relative; ">
+                    <template v-slot:activator="{ props }">
+                        <v-list-item v-bind="props"
+                            title="Afiliaciones"></v-list-item>
+                    </template>
+                    <!--IMSS-->
+                    <v-list-item :to="{ name: 'AltasIMSS' }" class="v-list-item__content" title="AltasIMSS"
+                        value="AltasImss">
+                    </v-list-item>
+                </v-list-group>
                 </v-list-group>
             </div>
         </v-list>

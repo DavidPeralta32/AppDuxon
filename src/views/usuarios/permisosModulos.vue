@@ -1,89 +1,8 @@
 <template>
     <notifications style="z-index:1001110 ;" />
-    <v-navigation-drawer style="color: white; font-size: 1em; margin: 0;padding: 0px;border: 0;" color="rgba(43,49,61)"
-        v-model="drawer" app>
-        <v-sheet color="white" style="width:100%; " class="pa-2">
-            <!--Icono de avatar-->
-
-            <div style="width:200px;  text-align: center; ">
-                <img style="width: 80%;" src="../fondos/LogoDuxon.svg">
-            </div>
-
-        </v-sheet>
-        <v-divider></v-divider>
-
-        <!--OTRA LISTA DE ITEMS EN NAVEGACIÓN-->
 
 
-
-        <v-list density="compact" nav style=" margin: 0;padding: 0px;">
-            <v-list-item :to="{ name: 'dashboard' }" prepend-icon="mdi-home-city" title="Inicio" value="home">
-            </v-list-item>
-
-
-
-
-            <!--Capital Humano modulo-->
-            <div>
-                <v-list-group class="v-list-item__content:hover" value="capitalHumanoMenu" style="position: relative; ">
-                    <template v-slot:activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
-                            title="Capital Humano"></v-list-item>
-                    </template>
-                    <v-list-item :to="{ name: 'Capital Humano' }" class="v-list-item__content" title="Empleados"
-                        value="Empleados">
-                    </v-list-item>
-
-
-                </v-list-group>
-
-                <!-- Almacén-->
-                <v-list-group v-if="almacen_show" class="v-list-item__content:hover" value="AlmacenMenu"
-                    style="position: relative; ">
-                    <template v-slot:activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
-                            title="Almacén"></v-list-item>
-                    </template>
-                    <v-list-item to="" class="v-list-item__content" title="Empleados" value="">
-                    </v-list-item>
-                </v-list-group>
-
-                <v-list-group v-if="Usuarios_show" class="v-list-item__content:hover" style="position: relative; ">
-                    <template v-slot:activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-human-greeting-proximity"
-                            title="Admon. Usuarios"></v-list-item>
-                    </template>
-                    <v-list-item :to="{ name: 'usuarios' }" class="v-list-item__content" title="Usuarios" value="">
-                    </v-list-item>
-                </v-list-group>
-            </div>
-
-
-            <!--FIN Capital Humano modulo-->
-            <v-list-item :to="{ name: 'servicios' }" v-show="permisoUsuario" prepend-icon="mdi-home-city" title="Servicios"
-                value="Servicios">
-            </v-list-item>
-
-            <v-list-item :to="{ name: 'usuarios' }" v-show="permisoUsuario" prepend-icon="mdi-home-city" title="Usuarios"
-                value="Usuarios">
-            </v-list-item>
-        </v-list>
-    </v-navigation-drawer>
-
-
-    <v-app-bar style="background:#2890CD ;">
-        <v-app-bar-nav-icon style="color: white;" @click="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-toolbar-title style="color: white;">Bienvenido</v-toolbar-title>
-        <v-btn @click="limpiarCodigo()" :to="{ name: 'login' }" style="color: white;" title="Cerrar sesión">
-            <v-icon left>
-                mdi-exit-to-app
-            </v-icon>
-            Cerrar sesión
-        </v-btn>
-    </v-app-bar>
     <v-row>
-
-
         <v-select variant="outlined" label="Selecciona un módulo" hint="Por favor, elige el módulo correspondiente."
             persistent-hint v-model="selectModulo" style="margin-left:20rem;margin-right:6rem;margin-top:2rem; width: 10;"
             :items="modulosDisponibles">
@@ -106,6 +25,7 @@
                 <v-btn depressed color="primary" @click="actualizarPermisosCH()">Guardar cambios</v-btn>
             </v-col>
         </v-row>
+        
         <v-row>
             <!--Sección empleados activos-->
             <v-card style="width: 30%;   margin-left: 1%; margin-right: 1%;" :readonly="activoCH" variant="outlined"
@@ -295,11 +215,6 @@
             </v-card>
         </v-row>
 
-
-
-
-
-
         <!-- <v-row> 
                  
                                       <v-switch style="margin-left:2.5rem;" v-model="switchEditarDocumentacion" color="success"
@@ -325,13 +240,25 @@
         <h2>Aqui va la info de los permisos de servicio </h2>
         HOLA MUNDO
     </div>
+
+    <!-- Permisos contabilidad -->
+    <div v-if="ContabilidadIF" style="margin-left:3%; margin-right: 1%; margin-bottom: 5%;">
+        <permisoRegistroPatronal ref="permisoRegistroPatronal"></permisoRegistroPatronal>
+    </div>
+    <!-- FIN Permisos contabilidad -->
 </template>
 
 <script>
 import router from '@/main';
 import axios from 'axios';
 import { isNull } from 'lodash';
+
+import permisoRegistroPatronal from '../../components/PermisosContabilidad/permisoRegistroPatronal.vue';
+
 export default {
+    components:{
+        permisoRegistroPatronal: permisoRegistroPatronal,
+    },
     data: () => ({
         permisoUsuario: false,
         modulosDisponibles: [],
@@ -340,6 +267,7 @@ export default {
         permisoModulo: [],
         servicioIF: '',
         empleadosIF: '',
+        ContabilidadIF: '',
         selectModulo: '',
         activoCH: true,
         switchModuloCH: '',
@@ -357,6 +285,7 @@ export default {
         switchEditarDocumentacion: "0",
         switchEditarFotografia: "0",
         switchEditarHistorial: "0",
+        permisoRegistroPatronal:"",
         open: ['Users'],
         admins: [
             ['Management', 'mdi-account-multiple-outline'],
@@ -377,6 +306,7 @@ export default {
                 case "Capital Humano":
                     this.empleadosIF = true
                     this.servicioIF = false
+                    this.ContabilidadIF = false
                     //llamar metodo que traiga permisos
                     this.obtenerPermisosCH();
                     break;
@@ -384,12 +314,17 @@ export default {
                 case "Servicios":
                     this.servicioIF = true
                     this.empleadosIF = false
+                    this.ContabilidadIF = false
+                    break;
+
+                case "Contabilidad":
+                    this.ContabilidadIF = true
+                    this.servicioIF = false
+                    this.empleadosIF = false
                     break;
             }
         },
         switchModuloCH() {
-
-
 
             switch (this.switchModuloCH) {
                 case '0':
@@ -409,9 +344,6 @@ export default {
                     this.switchEditarDocumentacion = "0"
                     this.switchEditarFotografia = "0"
                     this.switchEditarHistorial = "0"
-
-
-
 
                     break;
                 case '1':
@@ -448,7 +380,6 @@ export default {
             axios.post(self.entorno+'general/permisoUsuarioCH', {
                 idEmpleado: self.$route.params.id
             }).then(function (response) {
-
                 //Si no hay un registro de permisos, se crea
                 if (response.data == '' || response.data == []) {
                     axios.post(self.entorno+'general/crearPermisoCH', {
@@ -456,7 +387,6 @@ export default {
                     }).then(function (response) {
 
                     })
-
                 } else {
                     var permisos = response.data[0]
                     self.switchModuloCH = permisos.moduloCH.toString()
@@ -596,14 +526,17 @@ export default {
                 //alert(self.$route.params.id)
                 var puesto = response.data[0].puesto
                 var departamento = response.data[0].departamento
-                if (puesto.includes('GERENTE')) {
+                if (puesto.includes('GERENTE') || puesto.includes('JEFE C.H. NORTE')) {
                     //todos
-                    self.modulosDisponibles = ['Capital Humano']
+                    self.modulosDisponibles = ['Capital Humano','Contabilidad']
                 } else {
                     switch (departamento) {
                         case 'CAPITAL HUMANO':
 
                             self.modulosDisponibles = ['Capital Humano']
+                            break;
+                        case 'Contabilidad':
+                            self.modulosDisponibles = ['Contabilidad']
                             break;
 
                         default:

@@ -26,7 +26,7 @@ import usuarios from './views/usuarios/usuarios.vue'
 import modulos from './views/usuarios/permisosModulos.vue'
 import servicios from './views/servicios/servicios.vue'
 import registroPatronal from './views/contabilidad/registroPatronal.vue'
-import Imss from './views/RH/Imss.vue'
+import AltasImss from './views/contabilidad/ImssAltas.vue'
 import navBar from './views/general/navBar.vue'
 import Departamentos from '@/views/RH/Departamentos.vue'
 import Puestos from '@/views/RH/Puestos.vue'
@@ -49,17 +49,12 @@ const routes = [
             {
                 path: 'Empleados',
                 name: 'Empleados',
-                component: empleados       
-            }, 
+                component: empleados
+            },
             {
                 path: 'expediente/:id?',
-                name:'expediente',
+                name: 'expediente',
                 component: expediente
-            },         
-            {
-                path: 'IMSS',
-                name: 'IMSS',
-                component: Imss
             },
             {
                 path: 'Departamentos',
@@ -101,9 +96,15 @@ const routes = [
     }
     ,
     {
-        name: 'permisosModulos',
-        path: '/permisosModulos/:id?',
-        component: modulos
+        path: '/PermisosModulos/', name: 'permisosModulos', component: navBar,
+        children: [
+            {
+                name: 'permisosModulos',
+                path: '/permisosModulos/:id?',
+                component: modulos
+            }
+        ]
+
     },
     {
         name: 'servicios',
@@ -118,7 +119,18 @@ const routes = [
                 path: 'Registro_Patronal',
                 name: 'Registro_Patronal',
                 component: registroPatronal,
-            }
+            },
+            {
+                path: 'Afiliciaciones/',
+                name: 'Afiliaciones',
+                children: [
+                    {
+                        path: 'AltasIMSS',
+                        name: 'AltasIMSS',
+                        component: AltasImss,
+                    }
+                ],
+            },
         ]
 
     },

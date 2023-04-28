@@ -1,11 +1,11 @@
 <template>
    <v-container style="z-index: 0; width: 100%;  border-width:1px; background-color: white;">
-      <h2>IMSS</h2>
+      <h2>Altas IMSS</h2>
 
       <v-text-field variant="outlined" label="Buscar" density="compact" type="text" v-model="valorCampo"
          style="width: 100%; margin-top: 16px;"></v-text-field>
 
-      <EasyDataTable :headers="headers" :items="itemsImss" buttons-pagination table-class-name="customize-table"
+      <EasyDataTable :headers="headers" :items="itemsAltasImss" buttons-pagination table-class-name="customize-table"
          :search-value="valorCampo" :loading="isLoading" empty-message="No se encontraron empleados con seguro social">
 
       </EasyDataTable>
@@ -14,11 +14,13 @@
 
    </v-container>
 </template>
-
-
+ 
+ 
 <script>
+import axios from 'axios';
 
 export default {
+
    components: {
       EasyDataTable: window['vue3-easy-data-table'],
       Header: window['vue3-easy-data-table'],
@@ -45,9 +47,25 @@ export default {
             { text: "# Elementos", value: "nElementos", sortable: true },
             { text: "Opciones", value: "Opciones" },
          ],
-         itemsImss: [],
+         itemsAltasImss: [],
       }
    },
 
-}
+   methods: {
+
+      getInfoEmpleadosAltaImss() {
+         const self = this;
+
+         axios.post(self.entorno + 'contabilidad/getInfoEmpleadosAltaImss')
+            .then((response) => {
+               if(response.data.length > 0){
+                  self.itemsAltasImss = response.data;
+               }else{
+                  self.itemsAltasImss = [];
+               }
+            });
+      }
+   }
+
+};
 </script>

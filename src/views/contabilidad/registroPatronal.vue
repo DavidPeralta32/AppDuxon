@@ -17,10 +17,13 @@
         <!--item Activos-->
         <v-window-item value="tab-Activos" style="min-height:  100%; margin-top: 2%; margin-bottom: 5%; border: 0;">
             <v-container style="z-index: 0; width: 100%;  border-width:1px; background-color: white;">
-                <div
-                    style="z-index: 0; width: 100%;  border-width:1px; background-color: white;text-align: end;margin-bottom: 16px; ">
-                    <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-plus-circle-outline"
-                        color="blue" bg-color="white" @click="nuevoRegistroPatronal()">Agregar</v-btn>
+                <div style="z-index: 0; width: 100%;  border-width:1px; background-color: white;text-align: end;margin-bottom: 16px; display: flex; justify-content: space-between; ">
+                    <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-plus-circle-outline" color="blue"
+                        bg-color="white" @click="abrirDialogRPatronalAdmin()">Agregar Servicio Administrativos</v-btn>
+                    
+                    <v-btn small style="vertical-align: bottom;" prepend-icon="mdi-plus-circle-outline" color="blue"
+                        bg-color="white" @click="nuevoRegistroPatronal()"
+                        :disabled="this.nNuevoRPatronal_dis">Agregar</v-btn>
                 </div>
 
                 <tablaRegistroPatronal ref="tablaRegistroPatronal"></tablaRegistroPatronal>
@@ -86,7 +89,8 @@
                         <!-- nSalarioMinimoZRP -->
                         <v-col cols="12" md="6">
                             <v-text-field v-model="nSalarioMinimoZPR" type="number" step=0.01 min="0" max="1000"
-                                label="Salario Minimo ZRP" density="compact" variant="outlined" required :rules="nameRules"></v-text-field>
+                                label="Salario Minimo ZRP" density="compact" variant="outlined" required
+                                :rules="nameRules"></v-text-field>
                         </v-col>
 
                         <!-- Prima de riesgo -->
@@ -110,12 +114,67 @@
         </v-card>
     </v-dialog>
     <!--FIN Modal agregar nuevo registro patronal-->
+
+
+
+
+    <!--Modal servicio a registro patronal administrativo-->
+    <v-dialog style="width: 60%; min-height: auto;" v-model="dialogAsignarRPatronalAdmin" persistent="true"
+        transition="dialog-top-transition">
+        <v-card>
+            <v-toolbar color="primary" dark style="position: fixed;z-index: 100; width: 100%;">
+
+                <div class="toolbar-titulo">
+                    <div class="texto">
+                        <h2 style="margin-left: 20px">Asignar Registro Patronal a Servicio Administrativo </h2>
+                    </div>
+                    <div class="icon_close">
+                        <v-btn icon dark @click="this.dialogAsignarRPatronalAdmin = false" style="margin-right: 8px;">
+                            <v-icon>mdi-close</v-icon></v-btn>
+                    </div>
+                </div>
+
+            </v-toolbar>
+
+            <v-container style="margin-top: 80px;">
+                <v-row style="margin-left: 1%;">
+                    <v-col cols="12" md="12">
+                        <v-autocomplete v-model="selectRegistroPatronal" label="Selección de Registro Patronal"
+                            multiple="true" :items="itemRegistroPatronal" item-title="nRegistroPatronal" item-value="nID"
+                            variant="outlined" required :rules="nameRules" density="compact"></v-autocomplete>
+
+                    </v-col>
+                </v-row>
+            </v-container>
+
+            <v-divider style="margin-bottom: 20px;"></v-divider>
+            <v-card-actions>
+                <v-row>
+                    <v-col cols="3">
+                        <v-btn @click="this.dialogAsignarRPatronalAdmin = false" small
+                            style="vertical-align: bottom; background: red;" color="white">Cancelar
+                        </v-btn>
+                    </v-col>
+
+                    <v-col cols="6">
+                    </v-col>
+                    <v-col cols="3">
+                        <v-btn small @click="asignarRPatronalAServicioAdmin()" style="vertical-align: bottom; background: #1867c0;" color="white">Asignar servicios
+                        </v-btn>
+                    </v-col>
+                </v-row>
+            </v-card-actions>
+
+        </v-card>
+    </v-dialog>
+    <!--FIN Modal servicio a registro patronal administrativo-->
 </template>
 
 <script>
 import { defineComponent, ref } from "vue";
-import tablaRegistroPatronal from '@/components/tablaRegistroPatronal.vue';
-import tablaRegistroPatronalBaja from '@/components/tablaRegistroPatronalBaja.vue';
+import tablaRegistroPatronal from '@/components/Contabilidad/tablaRegistroPatronal.vue';
+import tablaRegistroPatronalBaja from '@/components/Contabilidad/tablaRegistroPatronalBaja.vue';
+
 import axios from 'axios';
 
 export default defineComponent({
@@ -125,7 +184,8 @@ export default defineComponent({
         EasyDataTable: window['vue3-easy-data-table'],
     },
     created() {
-        
+        this.getPermisoArea();
+        this.getRegistrosPatronalAdmin();
     },
     data() {
         return {
@@ -134,7 +194,7 @@ export default defineComponent({
             //entorno: 'http://api-app.duxon.com.mx/',
             entorno: 'http://localhost:7005/',
             tablaRegistroPatronal: "",
-            tablaRegistroPatronalBaja: {},
+            tablaRegistroPatronalBaja: "",
 
             //rules
             nameRules: [
@@ -154,6 +214,13 @@ export default defineComponent({
             selectEstado: "",
             estados: ["Extranjero", "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila de Zaragoza", "Colima", "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo", "Jalisco", "Michoacán de Ocampo", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz de Ignacio de la Llave", "Yucatán", "Zacatecas"],
             valid: true,
+            dialogAsignarRPatronalAdmin: false,
+            selectRegistroPatronal: {},
+            itemRegistroPatronal: "",
+            sRPatronalAdmin:"",
+
+            //permisos
+            nNuevoRPatronal_dis: "",
 
 
         }
@@ -230,8 +297,8 @@ export default defineComponent({
          * Metodo para obtener el listado de los registros patronales que estan dados de baja
          * @author DPA
          */
-        obtenerPatronalBajas() {
-            this.$refs.tablaRegistroPatronalBaja.getRegistrosPatronalBaja();
+        async obtenerPatronalBajas() {
+            await this.$refs.tablaRegistroPatronalBaja.getRegistrosPatronalBaja();
         },
 
         /** obtenerPatronalActivos
@@ -246,12 +313,110 @@ export default defineComponent({
          * Metodo que limpia el formulario del dialog de agregar nuevo registro patronal y ademas cierra el dialog.
          * @author DPA
          */
-        limpiarContenidoFormAgregar(){
+        limpiarContenidoFormAgregar() {
             this.$refs.formAltaRegistroPatronal.reset();
             this.dialogAgregarRegistroPatronal = false;
-            
+
 
         },
+
+        async getPermisoArea() {
+            let self = this;
+
+            await axios.post(this.entorno + 'configuracion/permisoUsuarioRPatronal', {
+                idEmpleado: localStorage.getItem("id")
+            }).then(function (response) {
+
+                if (response.data[0].nNuevoRPatronal == 1) {
+                    self.nNuevoRPatronal_dis = false
+                } else {
+                    self.nNuevoRPatronal_dis = true
+                }
+
+            });
+        },
+
+
+        async abrirDialogRPatronalAdmin() {
+            
+            await this.getRPatronalesAServicioAdmin();
+
+            this.dialogAsignarRPatronalAdmin = true;
+        },
+
+        /** getRegistrosPatronal
+         * @description Metodo que trae desde el backend todos los registros patronales que estan Activos
+         * @returns {json}  registros patronales Activos
+         * @author DPA
+         */
+        getRegistrosPatronalAdmin() {
+            let self = this;
+            axios.post(self.entorno + 'contabilidad/getRegistroPatronal')
+                .then(function (response) {
+                    self.itemRegistroPatronal = response.data;
+                })
+        },
+
+        /** splitIntoArray
+         * @description Metodo que  toma un número como argumento y lo convierte en una matriz de números separando las cifras del número original por comas..
+         * @param {json} num 
+         * @returns {Array} Array numerico
+         * @author DPA
+         */
+        splitIntoArray(num) {
+            return String(num).split(',').map(Number);
+        },
+
+        async getRPatronalesAServicioAdmin() {
+            let self = this;
+            var rPatronales = '';
+            await axios.post(self.entorno + 'contabilidad/getRPatronalesAServicioAdmin')
+                .then(function (response) {
+                    rPatronales = response.data[0].idRPatronalAsignado;
+                    if(response.data.length > 0){
+                        self.selectRegistroPatronal = self.splitIntoArray(rPatronales); //servicios.split(',')
+                        self.rPatronales = self.splitIntoArray(rPatronales);
+                    }else{
+                        self.sRPatronalAdmin = "";
+                        self.selectRegistroPatronal = "";
+                    }
+                    
+                });
+                return rPatronales;
+        },
+
+        /** asignarRPatronalAServicioAdmin
+         * @description Metodo que asigna los servicios seleccionados al registro patronal seleccionado
+         * @returns 
+         * @author DPA
+         */
+         asignarRPatronalAServicioAdmin() {
+            let self = this;
+
+            axios.post(this.entorno + 'contabilidad/asignarRPatronalAServicioAdmin', {
+                serviciosAsignados: self.selectRegistroPatronal.toString()
+            }).then(function (response) {
+                if (response.data.affectedRows > 0) {
+
+                    self.$notify({
+                        title: "OK",
+                        text: "Los servicios han sido asignados con exito",
+                        type: 'success'
+                    });
+                    self.obtenerPatronalActivos();
+                    self.dialogAsignarRPatronalAdmin = false;
+                } else {
+                    self.$notify({
+                        title: "Error",
+                        text: "Ocurrio un error al asignar los servicios.",
+                        type: 'warn'
+                    });
+                }
+            })
+
+        },
+
+
 
     },
 })

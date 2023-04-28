@@ -13,11 +13,11 @@
                 </template>
 
                 <v-list>
-                    <v-list-item @click="abrirModalVerRegistroPatronal(nRegistroPatronal)">
+                    <v-list-item @click="abrirModalVerRegistroPatronal(nRegistroPatronal)" :disabled="this.nVerRPatronalBaja_dis">
                         <v-list-item-title>Ver</v-list-item-title>
                     </v-list-item>
 
-                    <v-list-item @click="abrirModalActivarPatronal(nRegistroPatronal)">
+                    <v-list-item @click="abrirModalActivarPatronal(nRegistroPatronal)" :disabled="this.nActivarRPatronal_dis">
                         <v-list-item-title>Activar Registro</v-list-item-title>
                     </v-list-item>
 
@@ -140,6 +140,7 @@
 
 <script>
 import axios from 'axios'
+import { ref } from "vue";
 
 export default ({
     components: {
@@ -147,7 +148,7 @@ export default ({
     },
     created() {
         this.getRegistrosPatronalBaja();
-
+        this.getPermisoArea();
     },
     data() {
         return {
@@ -186,8 +187,15 @@ export default ({
             sMotivoBaja: "",
             isLoading: true,
 
+            //Permisos
+            nVerRPatronalBaja_dis: "",
+            nActivarRPatronal_dis: "",
+
 
         }
+    },
+    watch: {
+        
     },
     methods: {
         /** getRegistrosPatronalBaja
@@ -353,6 +361,31 @@ export default ({
 
             return servicios;
         },
+
+        async getPermisoArea() {
+            let self = this
+            await axios.post(this.entorno + 'configuracion/permisoUsuarioRPatronal', {
+                idEmpleado: localStorage.getItem("id")
+            }).then(function (response) {
+
+                if (response.data[0].nVerRPatronalBaja == 1) {
+                    self.nVerRPatronalBaja_dis = false
+                } else {
+                    self.nVerRPatronalBaja_dis = true
+                }
+
+                if (response.data[0].nActivarRPatronal == "1") {
+                    self.nActivarRPatronal_dis = false
+                } else {
+                    self.nActivarRPatronal_dis = true
+                }
+
+            });
+        },
+
+
+
+
 
     },
 });

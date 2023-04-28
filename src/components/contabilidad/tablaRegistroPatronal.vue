@@ -14,23 +14,25 @@
                 </template>
 
                 <v-list>
-                    <v-list-item @click="abrirModalVerRegistroPatronal(nRegistroPatronal)">
+                    <v-list-item @click="abrirModalVerRegistroPatronal(nRegistroPatronal)" :disabled="this.nVerRPatronal">
                         <v-list-item-title>Ver</v-list-item-title>
                     </v-list-item>
-                    <v-list-item @click="abrirModalEditarPatronal(nRegistroPatronal)">
+                    <v-list-item @click="abrirModalEditarPatronal(nRegistroPatronal)" :disabled="this.nEditarRPatronal_dis">
                         <v-list-item-title>Editar</v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
 
-                    <v-list-item @click="abrirDialogTarjetaLaboral(nRegistroPatronal)">
+                    <v-list-item @click="abrirDialogTarjetaLaboral(nRegistroPatronal)"
+                        :disabled="this.nAgregarTarjetaLaboral_dis">
                         <v-list-item-title>Tarjeta laboral</v-list-item-title>
                     </v-list-item>
-                    <v-list-item @click="abrirModalAsignarServicio(nRegistroPatronal)">
+                    <v-list-item @click="abrirModalAsignarServicio(nRegistroPatronal)"
+                        :disabled="this.nAsignarServicios_dis">
                         <v-list-item-title>Asignar Servicios</v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
 
-                    <v-list-item @click="abrirModalBajaPatronal(nRegistroPatronal)">
+                    <v-list-item @click="abrirModalBajaPatronal(nRegistroPatronal)" :disabled="this.nBajaRPatronal_dis">
                         <v-list-item-title style="color: red;">Dar de baja </v-list-item-title>
                     </v-list-item>
                 </v-list>
@@ -46,9 +48,13 @@
             <v-card-text style="text-align: center;">
                 <h3 style="font-size: 1.2em;"> ¿Esta seguro que desea dar de baja el Registro Patronal?</h3>
             </v-card-text>
-            <div style="text-align: center;width: 100%; padding: 15px;">
-                <v-textarea v-model="sMotivoBaja" label="Motivo de Baja" maxlength="130" variant="outlined"></v-textarea>
-            </div>
+            <v-form ref="formBajaRegistroPatronal" v-model="valid" lazy-validation>
+                <div style="text-align: center;width: 100%; padding: 15px;">
+                    <v-textarea v-model="sMotivoBaja" label="Motivo de Baja" maxlength="130" variant="outlined"
+                        :rules="nameRules"></v-textarea>
+                </div>
+            </v-form>
+
             <v-row style="padding: 2%;">
                 <v-col cols="6" md="6">
                     <v-btn depressed color="error" @click="(this.dialogAlertBaja = false)">Cancelar</v-btn>
@@ -294,15 +300,27 @@
                 </v-toolbar>
 
                 <v-row style="padding: 2%; margin-top: 60px;">
-                    <v-col cols="6" md="6" v-if="sRutaArchivoTarjetaLaboral != ''">
-                        <a @click="descargarArchivo()"><span class="mdi mdi-arrow-down-bold-box"></span> {{
-                            sRutaArchivoTarjetaLaboral }}</a>
-                    </v-col>
+
                     <v-col cols="12" md="12">
                         <form @submit.prevent="añadirUrlTarjetaLaboral" ref='uploadForm' id='uploadForm' method='post'
                             encType="multipart/form-data">
-                            <v-file-input type="file" name="sampleFile" accept="application/pdf" placeholder="Subir Archivo" label="Subir Archivo"
-                                density="compact" ref="sampleFile" variant="outlined" prepend-icon="mdi-archive" />
+                            <v-file-input type="file" name="sampleFile" accept="application/pdf" placeholder="Subir Archivo"
+                                label="Subir Archivo" density="compact" ref="sampleFile" variant="outlined"
+                                prepend-icon="mdi-archive" />
+                            <!--Previsualizar Tarjeta laboral cargada-->
+                            <v-row v-if="sRutaArchivoTarjetaLaboral != ''" style="margin-bottom: 8px;">
+                                <v-col cols="9" md="9">
+                                    <h3>Documento actual:</h3>
+                                </v-col>
+                                <v-col cols="3" md="3">
+                                    <v-btn class="text-none ms-4 text-white" @click="descargarArchivo()" small
+                                        style="vertical-align: bottom; background: rgb(60, 200, 120);">
+                                        Descargar
+                                        <span class="mdi mdi-arrow-down-bold-box"></span>
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
+
                             <template v-if="visualizarTarjetaLaboral != ''">
                                 <div class="visualizador-pdf" style="width: 100%; height: 450px ;overflow: scroll;">
                                     <vue-pdf-embed :source="visualizarTarjetaLaboral" :page="1" />
@@ -311,7 +329,7 @@
 
                             <v-spacer></v-spacer>
                             <!--Botones de acciones -->
-                            <v-card-actions>
+                            <v-card-actions style="margin-top: 8px;">
                                 <v-row>
                                     <v-col cols="3">
                                         <v-btn text @click="dialogAñadirTarjetaLaboral = false"
@@ -357,6 +375,7 @@ export default ({
         this.getRegistrosPatronal();
         this.fechaActual();
         this.getServiciosPrincipal();
+        this.getPermisoArea();
     },
     data() {
         return {
@@ -436,6 +455,13 @@ export default ({
             sRutaArchivoTarjetaLaboral: "",
             visualizarTarjetaLaboral: "",
 
+            //permisos
+            nVerRPatronal_dis: "",
+            nEditarRPatronal_dis: "",
+            nAgregarTarjetaLaboral_dis: "",
+            nAsignarServicios_dis: "",
+            nBajaRPatronal_dis: "",
+
 
         }
     },
@@ -478,38 +504,48 @@ export default ({
         async bajaRegistroPatronal(nRegistroPatronal) {
             let self = this;
             self.dFechaBaja = self.dFechaActual;
-            if (!isEmpty(self.dFechaBaja)) {
-                await axios.post(self.entorno + 'contabilidad/bajaRegistroPatronal', {
-                    nRegistroPatronal: nRegistroPatronal,
-                    dFechaBaja: self.dFechaBaja,
-                    sMotivoBaja: self.sMotivoBaja,
-                }).then(function (response) {
-                    var res = response.data.affectedRows;
-                    if (res == '1') {
-                        self.$notify({
-                            title: "OK",
-                            text: "El Registro Patronal fue dado de baja con exito.",
-                            type: 'success'
-                        });
-                        self.getRegistrosPatronal();
-                        self.sMotivoBaja = '';
-                        self.dialogAlertBaja = false
-                    } else {
-                        this.$notify({
-                            title: "Error",
-                            text: "Ocurrio un error al dar de baja el Registro Patronal.",
-                            type: 'warn'
-                        });
-                    }
-                });
-            } else { // fecha vacia
+
+            const { valid } = await this.$refs.formBajaRegistroPatronal.validate();
+
+            if (valid) {
+                if (!isEmpty(self.dFechaBaja)) {
+                    await axios.post(self.entorno + 'contabilidad/bajaRegistroPatronal', {
+                        nRegistroPatronal: nRegistroPatronal,
+                        dFechaBaja: self.dFechaBaja,
+                        sMotivoBaja: self.sMotivoBaja,
+                    }).then(function (response) {
+                        var res = response.data.affectedRows;
+                        if (res == '1') {
+                            self.$notify({
+                                title: "OK",
+                                text: "El Registro Patronal fue dado de baja con exito.",
+                                type: 'success'
+                            });
+                            self.getRegistrosPatronal();
+                            self.sMotivoBaja = '';
+                            self.dialogAlertBaja = false
+                        } else {
+                            this.$notify({
+                                title: "Error",
+                                text: "Ocurrio un error al dar de baja el Registro Patronal.",
+                                type: 'warn'
+                            });
+                        }
+                    });
+                } else { // fecha vacia
+                    this.$notify({
+                        title: "Error",
+                        text: "No hay fecha de baja.",
+                        type: 'warn'
+                    });
+                }
+            } else {
                 this.$notify({
-                    title: "Error",
-                    text: "No hay fecha de baja.",
+                    title: "Error de registro",
+                    text: "Campos obligatorios.",
                     type: 'warn'
                 });
             }
-
         },
 
         /** abrirModalBajaPatronal
@@ -553,7 +589,6 @@ export default ({
                     nSalarioMinimoZRP: self.nSalarioMinimoZRP,
                     PrimaDeRiesgo: self.PrimaDeRiesgo,
                 }).then(function (response) {
-                    console.log(response);
                     if (response.data.affectedRows == '1') {
                         self.$notify({
                             title: "OK",
@@ -597,7 +632,6 @@ export default ({
             await axios.post(self.entorno + 'contabilidad/getRegistroPatronalxId', {
                 nRegistroPatronal: p_nRegistroPatronal,
             }).then(function (response) {
-                console.log(response);
                 self.nID = response.data[0].nID != 'null' || '' ? response.data[0].nID : '',
                     self.nRegistroPatronal = response.data[0].nRegistroPatronal != 'null' || '' ? response.data[0].nRegistroPatronal : '',
                     self.dFechaAlta = response.data[0].dFechaAlta != 'null' || '' ? response.data[0].dFechaAlta : '',
@@ -619,11 +653,9 @@ export default ({
             this.nRegistroPatronal = p_RegistroPatronal;
             this.itemsServicios = [];
             await this.obtenerInforRegistroPatronal(p_RegistroPatronal);
-            //await this.getServiciosxId(p_RegistroPatronal);
-            const servicios = await this.getServiciosxId(p_RegistroPatronal);
-            await this.abrirModalVer(servicios);
-
-
+            this.getServiciosxId(p_RegistroPatronal, servicios => {
+                this.abrirModalVer(servicios);
+            });
         },
 
         /**abrirModalVer
@@ -644,7 +676,8 @@ export default ({
          */
         abrirModalAsignarServicio(p_RegistroPatronal) {
             this.nRegistroPatronal = p_RegistroPatronal;
-            this.getServiciosxId(p_RegistroPatronal)
+            this.getServiciosxIdParaAsignarServ(p_RegistroPatronal);
+
             this.dialogAsignarServicios = true;
 
         },
@@ -658,7 +691,8 @@ export default ({
         getServicios(servicios) {
             let self = this;
             axios.post(this.entorno + 'contabilidad/getServicios', {
-                selectServicios: servicios
+                selectServicios: servicios,
+                nID: self.nID
             }).then(function (response) {
                 if (response.data.length > 0) {
                     self.itemsServicios = response.data;
@@ -717,23 +751,51 @@ export default ({
         * @returns {json} servicios
         * @author DPA
         */
-        async getServiciosxId(p_nRegistroPatronal) {
+        async getServiciosxId(p_nRegistroPatronal, callback) {
             let self = this;
             var servicios = '';
             await axios.post(this.entorno + 'contabilidad/serviciosxId', {
                 nRegistroPatronal: p_nRegistroPatronal
             }).then(function (response) {
-                servicios = response.data[0].ServiciosAsignados
-                console.log(servicios.split(','))
-                if (servicios == [] || servicios == '') {
-                    self.selectServicios = null;
+                if (response.data[0].ServiciosAsignados == null || response.data[0].ServiciosAsignados == "" || response.data[0].ServiciosAsignados == []) {
+                        axios.post(self.entorno + 'contabilidad/serviciosxIdAdmin', {
+                            nID: self.nID
+                        }).then(function (responseAdmin) {
+                            if (responseAdmin.data == null || responseAdmin.data == [] || responseAdmin.data == "") {
+                                self.selectServicios = null;
+                                callback(servicios);
+                            } else {
+                                servicios = responseAdmin.data[0].idServicio;
+                                self.selectServicios = self.splitIntoArray(servicios);
+                                servicios = self.splitIntoArray(servicios);
+                                callback(servicios);
+                            }
+                        });
                 } else {
-                    self.selectServicios = self.splitIntoArray(servicios); //servicios.split(',')
+                    servicios = response.data[0].ServiciosAsignados;
+                    self.selectServicios = self.splitIntoArray(servicios);
+                    servicios = self.splitIntoArray(servicios);
+                    callback(servicios);
+                }
+            });
+        },
+
+
+        //getserviciosxid para AsignarServicios
+        async getServiciosxIdParaAsignarServ(p_nRegistroPatronal) {
+            let self = this;
+            var servicios = '';
+            await axios.post(this.entorno + 'contabilidad/serviciosxId', {
+                nRegistroPatronal: p_nRegistroPatronal
+            }).then(function (response) {
+                if (response.data[0].ServiciosAsignados == null || response.data[0].ServiciosAsignados == "") {
+                        self.selectServicios = null;
+                } else {
+                    servicios = response.data[0].ServiciosAsignados;
+                    self.selectServicios = self.splitIntoArray(servicios);
                     servicios = self.splitIntoArray(servicios);
                 }
             });
-
-            return servicios;
         },
 
         /** getServiciosPrincipal
@@ -879,7 +941,53 @@ export default ({
         },
 
 
-    },
+        async getPermisoArea() {
+            let self = this
+            await axios.post(this.entorno + 'configuracion/permisoUsuarioRPatronal', {
+                idEmpleado: localStorage.getItem("id")
+            }).then(function (response) {
+
+                if (response.data[0].nVerRPatronal == "1") {
+                    self.nVerRPatronal_dis = false
+                } else {
+                    self.nVerRPatronal_dis = true
+                }
+
+                if (response.data[0].nEditarRPatronal == "1") {
+                    self.nEditarRPatronal_dis = false
+                } else {
+                    self.nEditarRPatronal_dis = true
+                }
+
+                if (response.data[0].nAgregarTarjetaLaboral == "1") {
+                    self.nAgregarTarjetaLaboral_dis = false
+                } else {
+                    self.nAgregarTarjetaLaboral_dis = true
+                }
+
+                if (response.data[0].nAsignarServicios == "1") {
+                    self.nAsignarServicios_dis = false
+                } else {
+                    self.nAsignarServicios_dis = true
+                }
+
+                if (response.data[0].nBajaRPatronal == "1") {
+                    self.nBajaRPatronal_dis = false
+                } else {
+                    self.nBajaRPatronal_dis = true
+                }
+
+            });
+        },
+
+
+
+
+    }
+
+
+
+
 });
 
 
